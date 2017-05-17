@@ -1,0 +1,213 @@
+<script src="jquery.min.js"></script>
+
+<body>
+<script>
+var Node = function (name) {
+    this.children = [];
+    this.name = name;
+}
+ 
+Node.prototype = {
+    add: function (child) {
+        this.children.push(child);
+    },
+ 
+    remove: function (child) {
+        var length = this.children.length;
+        for (var i = 0; i < length; i++) {
+            if (this.children[i] === child) {
+                this.children.splice(i, 1);
+                return;
+            }
+        }
+    },
+ 
+    getChild: function (i) {
+        return this.children[i];
+    },
+ 
+    hasChildren: function () {
+        return this.children.length > 0;
+    }
+}
+ 
+// recursively traverse a (sub)tree
+ 
+function traverse(indent, node) {
+    log.add(Array(indent++).join("--") + node.name);
+ 
+    for (var i = 0, len = node.children.length; i < len; i++) {
+        traverse(indent, node.getChild(i));
+    }
+}
+ 
+// logging helper
+ 
+var log = (function () {
+    var log = "";
+ 
+    return {
+        add: function (msg) { log += msg + "\n"; },
+        show: function () { alert(log); log = ""; }
+    }
+})();
+ 
+function run() {
+    var tree = new Node("Raiz");
+    var left = new Node("Izq.")
+    var right = new Node("Der.");
+    var leftleft = new Node("Izq-Izq");
+    var leftright = new Node("Izq-Der");
+    var rightleft = new Node("Der-Izq");
+    var rightright = new Node("Der-Der");
+ 
+    tree.add(left);
+    tree.add(right);
+    tree.remove(right);  // note: remove
+    tree.add(right);
+ 
+    left.add(leftleft);
+    left.add(leftright);
+ 
+    right.add(rightleft);
+    right.add(rightright);
+ 
+    traverse(1, tree);
+ 
+    log.show();
+}
+</script>
+<button onClick="run()" style="padding:15px;">Clickear</button>
+<div class="content">
+<style type="text/css">
+        .composite-gallery {
+            border:2px solid #ccc;
+            padding:10px;
+            margin-bottom:10px;
+        }
+
+        .composite-gallery img {
+            margin:0 15px 0 0;
+            border:2px solid #ccc;
+            display:inline-block;
+        }
+	img{
+	    width:300px;
+	    height:auto;
+	}
+    </style>
+<script>
+
+    (function ($) {
+
+    var GalleryComposite = function (heading, id) {
+        this.children = [];
+
+        this.element = $('<div id="' + id + '" class="composite-gallery"></div>')
+            .append('<h2>' + heading + '</h2>');
+    }
+
+    GalleryComposite.prototype = {
+        add: function (child) {
+            this.children.push(child);
+            this.element.append(child.getElement());
+        },
+
+        remove: function (child) {
+            for (var node, i = 0; node = this.getChild(i); i++) {
+                if (node == child) {
+                    this.children.splice(i, 1);
+                    this.element.detach(child.getElement());
+                    return true;
+                }
+
+                if (node.remove(child)) {
+                    return true;
+                }
+            }
+
+            return false;
+        },
+
+        getChild: function (i) {
+            return this.children[i];
+        },
+
+        hide: function () {
+            for (var node, i = 0; node = this.getChild(i); i++) {
+                node.hide();
+            }
+
+            this.element.hide(0);
+        },
+
+        show: function () {
+            for (var node, i = 0; node = this.getChild(i); i++) {
+                node.show();
+            }
+
+            this.element.show(0);
+        },
+
+        getElement: function () {
+            return this.element;
+        }
+    }
+
+
+    var GalleryImage = function (src, id) {
+        this.children = [];
+
+        this.element = $('<img />')
+            .attr('id', id)
+            .attr('src', src);
+    }
+
+    GalleryImage.prototype = {
+        
+        add: function () { },
+
+        remove: function () { },
+
+        getChild: function () { },
+
+        hide: function () {
+            this.element.hide(0);
+        },
+
+        show: function () {
+            this.element.show(0);
+        },
+
+        getElement: function () {
+            return this.element;
+        }
+    }
+
+
+    var container = new GalleryComposite('Contenedor', 'allgalleries');
+    var gallery1 = new GalleryComposite('Galeria 1', 'gallery1');
+    var gallery2 = new GalleryComposite('Galeria 2', 'gallery2');
+    var image1 = new GalleryImage('image1.jpg', 'img1');
+    var image2 = new GalleryImage('image2.jpg', 'img2');
+    var image3 = new GalleryImage('image3.jpg', 'img3');
+    var image4 = new GalleryImage('image4.jpg', 'img4');
+
+    gallery1.add(image1);
+    gallery1.add(image2);
+
+    gallery2.add(image3);
+    gallery2.add(image4);
+
+    container.add(gallery1);
+    container.add(gallery2);
+
+    container.getElement().appendTo('.content');
+    container.show();
+
+    }(jQuery));
+    
+</script>
+
+</div>
+</body>
